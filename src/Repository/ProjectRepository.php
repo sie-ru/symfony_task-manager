@@ -3,9 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Project;
+use App\Entity\Task;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,27 +22,32 @@ class ProjectRepository extends ServiceEntityRepository
         parent::__construct($registry, Project::class);
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function add(Project $entity, bool $flush = true): void
+    public function getProjectById($id)
     {
-        $this->_em->persist($entity);
-        if ($flush) {
-            $this->_em->flush();
-        }
+        return $this->getProjectsQueryBuilder()
+            ->where('id', '=', $id)
+            ->getQuery()
+            ->getResult(AbstractQuery::HYDRATE_ARRAY); 
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function remove(Project $entity, bool $flush = true): void
+    public function getPojectId()
     {
-        $this->_em->remove($entity);
-        if ($flush) {
-            $this->_em->flush();
-        }
+        return $this->getProjectsQueryBuilder()
+                    ->select('id')
+                    ->getQuery()
+                    ->getResult(AbstractQuery::HYDRATE_ARRAY);
     }
+
+    public function getProjectList()
+    {
+        return $this->getProjectsQueryBuilder()
+                    ->getQuery()
+                    ->getResult(AbstractQuery::HYDRATE_ARRAY);
+    }
+    
+    public function getProjectsQueryBuilder() : QueryBuilder
+    {
+        return $this->createQueryBuilder('p');
+    }
+    
 }
